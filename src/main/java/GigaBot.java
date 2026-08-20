@@ -1,7 +1,7 @@
 public class GigaBot {
     public static void main(String[] args) {
-        String banner = "   _______             ____        _    \n"
-                      + "  / _____             |  _ \\      | |   \n"
+        String banner = "   _____ _             ____        _    \n"
+                      + "  / ____(_)           |  _ \\      | |   \n"
                       + " | |  __ _  __ _  __ _| |_) | ___ | |_  \n"
                       + " | | |_ | |/ _` |/ _` |  _ < / _ \\| __| \n"
                       + " | |__| | | (_| | (_| | |_) | (_) | |_  \n"
