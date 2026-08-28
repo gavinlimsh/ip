@@ -20,7 +20,7 @@ public class GigaBot {
         System.out.println(horizontalLine);
 
         // Initialize Variables
-        String tasks[] = new String[100];
+        Task tasks[] = new Task[100];
         int tasksCounter = 0;
         Scanner in = new Scanner(System.in);
 
@@ -36,12 +36,27 @@ public class GigaBot {
                 break;
             } else if (userInput.equals("list")) {
                 System.out.println(horizontalLine);
+                System.out.println("[GigaBot] >> Here are the tasks in your list:");
                 for (int i = 0; i < tasksCounter; i++) {
-                    System.out.println("[GigaBot] >> " + (i+1) + ". " + tasks[i]);
+                    System.out.println("[GigaBot] >> " + (i+1) + ".[" + tasks[i].getStatusIcon() + "] " + tasks[i].description);
                 }
                 System.out.println(horizontalLine);
+            } else if (userInput.startsWith("mark ")) {
+                int index = Integer.parseInt(userInput.substring(5)) - 1;
+                tasks[index].markAsDone();
+                System.out.println(horizontalLine);
+                System.out.println("[GigaBot] >> Nice! I've marked this task as done:");
+                System.out.println("[GigaBot] >>   [" + tasks[index].getStatusIcon() + "] " + tasks[index].description);
+                System.out.println(horizontalLine);
+            } else if (userInput.startsWith("unmark ")) {
+                int index = Integer.parseInt(userInput.substring(7)) - 1;
+                tasks[index].markAsUndone();
+                System.out.println(horizontalLine);
+                System.out.println("[GigaBot] >> OK, I've marked this task as not done yet:");
+                System.out.println("[GigaBot] >>   [" + tasks[index].getStatusIcon() + "] " + tasks[index].description);
+                System.out.println(horizontalLine);
             } else {
-                tasks[tasksCounter] = userInput;
+                tasks[tasksCounter] = new Task(userInput);
                 tasksCounter++;
 
                 System.out.println(horizontalLine);
