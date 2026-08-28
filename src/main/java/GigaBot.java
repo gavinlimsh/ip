@@ -18,6 +18,7 @@ public class GigaBot {
 
     /**
      * Initializes the application and enters the main listening loop.
+     * @param args Command line arguments.
      */
     public static void main(String[] args) {
         System.out.println(HORIZONTAL_LINE);
