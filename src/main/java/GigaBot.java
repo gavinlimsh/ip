@@ -19,7 +19,9 @@ public class GigaBot {
         System.out.println("What can I do for you?");
         System.out.println(horizontalLine);
 
-        // Initialize Scanner
+        // Initialize Variables
+        String tasks[] = new String[100];
+        int tasksCounter = 0;
         Scanner in = new Scanner(System.in);
 
         // Listen in on new input
@@ -32,11 +34,20 @@ public class GigaBot {
                 System.out.println("[GigaBot] >> Shutting down. Hope to see you again soon!");
                 System.out.println(horizontalLine);
                 break;
-            }
+            } else if (userInput.equals("list")) {
+                System.out.println(horizontalLine);
+                for (int i = 0; i < tasksCounter; i++) {
+                    System.out.println("[GigaBot] >> " + (i+1) + ". " + tasks[i]);
+                }
+                System.out.println(horizontalLine);
+            } else {
+                tasks[tasksCounter] = userInput;
+                tasksCounter++;
 
-            System.out.println(horizontalLine);
-            System.out.println("[GigaBot] >> " + userInput);
-            System.out.println(horizontalLine);
+                System.out.println(horizontalLine);
+                System.out.println("[GigaBot] >> added: " + userInput);
+                System.out.println(horizontalLine);
+            }
         }
         in.close();
     }
