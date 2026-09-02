@@ -37,4 +37,14 @@ public class Task {
     public void markAsUndone() {
         this.isDone = false;
     }
+
+    /**
+     * Returns the string representation of the task.
+     *
+     * @return Formatted string of the task.
+     */
+    @Override
+    public String toString() {
+        return "[" + getStatusIcon() + "] " + description;
+    }
 }
