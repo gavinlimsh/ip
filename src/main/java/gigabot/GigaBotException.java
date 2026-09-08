@@ -1,3 +1,5 @@
+package gigabot;
+
 /**
  * Represents exceptions specific to the GigaBot application.
  */
