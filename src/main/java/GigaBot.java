@@ -16,6 +16,11 @@ public class GigaBot {
 
     private static final String HORIZONTAL_LINE = "____________________________________________________________";
 
+    // Extracted Magic Literals
+    private static final String BY_MARKER = " /by ";
+    private static final String FROM_MARKER = " /from ";
+    private static final String TO_MARKER = " /to ";
+
     /**
      * Formats and prints the confirmation message when a new task is added.
      *
@@ -35,6 +40,7 @@ public class GigaBot {
 
     /**
      * Initializes the application and enters the main listening loop.
+     *
      * @param args Command line arguments.
      */
     public static void main(String[] args) {
@@ -50,49 +56,79 @@ public class GigaBot {
 
         while (true) {
             String userInput = in.nextLine();
+            String command = userInput.trim();
 
-            if (userInput.equals("bye")) {
+            if (command.equals("bye")) {
                 System.out.println(HORIZONTAL_LINE);
                 System.out.println("[GigaBot] >> Shutting down. Hope to see you again soon!");
                 System.out.println(HORIZONTAL_LINE);
                 break;
-            } else if (userInput.equals("list")) {
-                System.out.println(HORIZONTAL_LINE);
-                System.out.println("[GigaBot] >> Here are the tasks in your list:");
-                for (int i = 0; i < tasksCounter; i++) {
-                    System.out.println("[GigaBot] >> " + (i + 1) + "." + tasks[i].toString());
+            }
+
+            try {
+                if (command.equals("list")) {
+                    System.out.println(HORIZONTAL_LINE);
+                    System.out.println("[GigaBot] >> Here are the tasks in your list:");
+                    for (int i = 0; i < tasksCounter; i++) {
+                        System.out.println("[GigaBot] >> " + (i + 1) + "." + tasks[i].toString());
+                    }
+                    System.out.println(HORIZONTAL_LINE);
+
+                } else if (command.startsWith("mark ")) {
+                    int index = Integer.parseInt(command.substring(5)) - 1;
+                    tasks[index].markAsDone();
+                    System.out.println(HORIZONTAL_LINE);
+                    System.out.println("[GigaBot] >> Nice! I've marked this task as done:");
+                    System.out.println("[GigaBot] >>   " + tasks[index].toString());
+                    System.out.println(HORIZONTAL_LINE);
+
+                } else if (command.startsWith("unmark ")) {
+                    int index = Integer.parseInt(command.substring(7)) - 1;
+                    tasks[index].markAsUndone();
+                    System.out.println(HORIZONTAL_LINE);
+                    System.out.println("[GigaBot] >> OK, I've marked this task as not done yet:");
+                    System.out.println("[GigaBot] >>   " + tasks[index].toString());
+                    System.out.println(HORIZONTAL_LINE);
+
+                } else if (command.startsWith("todo")) {
+                    if (command.equals("todo")) {
+                        throw new GigaBotException("A todo task requires a description. (e.g., todo read book)");
+                    }
+                    String description = command.substring(5).trim();
+                    tasks[tasksCounter] = new Todo(description);
+                    tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
+
+                } else if (command.startsWith("deadline")) {
+                    if (!command.contains(BY_MARKER)) {
+                        throw new GigaBotException("A deadline requires a '" + BY_MARKER.trim() + "' marker.");
+                    }
+                    String[] parts = command.substring(9).split(BY_MARKER);
+                    if (parts.length < 2 || parts[0].trim().isEmpty()) {
+                        throw new GigaBotException("A deadline requires both a description and a time.");
+                    }
+                    tasks[tasksCounter] = new Deadline(parts[0].trim(), parts[1].trim());
+                    tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
+
+                } else if (command.startsWith("event")) {
+                    if (!command.contains(FROM_MARKER) || !command.contains(TO_MARKER)) {
+                        throw new GigaBotException("An event requires both '" + FROM_MARKER.trim() + "' and '" + TO_MARKER.trim() + "' markers.");
+                    }
+                    String[] parts = command.substring(6).split(FROM_MARKER);
+                    String[] timeParts = parts[1].split(TO_MARKER);
+                    tasks[tasksCounter] = new Event(parts[0].trim(), timeParts[0].trim(), timeParts[1].trim());
+                    tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
+
+                } else {
+                    throw new GigaBotException("SYSTEM ERROR: Command not recognized. Please use todo, deadline, event, list, mark, unmark, or bye.");
                 }
+
+            } catch (GigaBotException e) {
                 System.out.println(HORIZONTAL_LINE);
-            } else if (userInput.startsWith("mark ")) {
-                int index = Integer.parseInt(userInput.substring(5)) - 1;
-                tasks[index].markAsDone();
+                System.out.println("[GigaBot] >> " + e.getMessage());
                 System.out.println(HORIZONTAL_LINE);
-                System.out.println("[GigaBot] >> Nice! I've marked this task as done:");
-                System.out.println("[GigaBot] >>   " + tasks[index].toString());
+            } catch (NumberFormatException | IndexOutOfBoundsException e) {
                 System.out.println(HORIZONTAL_LINE);
-            } else if (userInput.startsWith("unmark ")) {
-                int index = Integer.parseInt(userInput.substring(7)) - 1;
-                tasks[index].markAsUndone();
-                System.out.println(HORIZONTAL_LINE);
-                System.out.println("[GigaBot] >> OK, I've marked this task as not done yet:");
-                System.out.println("[GigaBot] >>   " + tasks[index].toString());
-                System.out.println(HORIZONTAL_LINE);
-            } else if (userInput.startsWith("todo ")) {
-                String description = userInput.substring(5).trim();
-                tasks[tasksCounter] = new Todo(description);
-                tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
-            } else if (userInput.startsWith("deadline ")) {
-                String[] parts = userInput.substring(9).split(" /by ");
-                tasks[tasksCounter] = new Deadline(parts[0], parts[1]);
-                tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
-            } else if (userInput.startsWith("event ")) {
-                String[] parts = userInput.substring(6).split(" /from ");
-                String[] timeParts = parts[1].split(" /to ");
-                tasks[tasksCounter] = new Event(parts[0], timeParts[0], timeParts[1]);
-                tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
-            } else {
-                System.out.println(HORIZONTAL_LINE);
-                System.out.println("[GigaBot] >> OOPS!!! I'm sorry, but I don't know what that means :-(");
+                System.out.println("[GigaBot] >> SYSTEM ERROR: Invalid task number or format provided.");
                 System.out.println(HORIZONTAL_LINE);
             }
         }
