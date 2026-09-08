@@ -1,3 +1,5 @@
+package gigabot;
+
 /**
  * Represents a basic task with a description and a completion status.
  */

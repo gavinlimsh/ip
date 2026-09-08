@@ -1,3 +1,5 @@
+package gigabot;
+
 import java.util.Scanner;
 
 /**
