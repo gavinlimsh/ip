@@ -1,5 +1,9 @@
 package gigabot;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -18,18 +22,73 @@ public class GigaBot {
 
     private static final String HORIZONTAL_LINE = "____________________________________________________________";
 
-    // Extracted Magic Literals
     private static final String BY_MARKER = " /by ";
     private static final String FROM_MARKER = " /from ";
     private static final String TO_MARKER = " /to ";
 
+    // OS-Independent File Paths
+    private static final String DATA_DIRECTORY = "data";
+    private static final String DATA_FILE_PATH = DATA_DIRECTORY + File.separator + "gigabot.txt";
+
     /**
-     * Formats and prints the confirmation message when a new task is added.
-     *
-     * @param task The newly created task.
-     * @param currentCount The number of tasks currently in the list before addition.
-     * @return The updated total number of tasks.
+     * Saves the current list of tasks to the hard disk.
+     * Creates the directory and file if they do not exist.
      */
+    private static void saveTasks(Task[] tasks, int tasksCounter) {
+        try {
+            File dir = new File(DATA_DIRECTORY);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            FileWriter fw = new FileWriter(DATA_FILE_PATH);
+            for (int i = 0; i < tasksCounter; i++) {
+                fw.write(tasks[i].toSaveFormat() + System.lineSeparator());
+            }
+            fw.close();
+        } catch (IOException e) {
+            System.out.println("[GigaBot] >> SYSTEM ERROR: Could not save tasks to disk.");
+        }
+    }
+
+    /**
+     * Loads tasks from the hard disk on startup.
+     *
+     * @param tasks The array to populate with loaded tasks.
+     * @return The number of tasks successfully loaded.
+     */
+    private static int loadTasks(Task[] tasks) {
+        int loadedCount = 0;
+        try {
+            File f = new File(DATA_FILE_PATH);
+            if (!f.exists()) {
+                return 0; // No previous data to load
+            }
+            Scanner fileScanner = new Scanner(f);
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                String[] parts = line.split(" \\| ");
+                if (parts[0].equals("T")) {
+                    tasks[loadedCount] = new Todo(parts[2]);
+                } else if (parts[0].equals("D")) {
+                    tasks[loadedCount] = new Deadline(parts[2], parts[3]);
+                } else if (parts[0].equals("E")) {
+                    tasks[loadedCount] = new Event(parts[2], parts[3], parts[4]);
+                }
+
+                if (parts[1].equals("1")) {
+                    tasks[loadedCount].markAsDone();
+                }
+                loadedCount++;
+            }
+            fileScanner.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("[GigaBot] >> SYSTEM ERROR: Data file not found.");
+        } catch (Exception e) {
+            System.out.println("[GigaBot] >> SYSTEM ERROR: Data file corrupted.");
+        }
+        return loadedCount;
+    }
+
     private static int printTaskAdded(Task task, int currentCount) {
         System.out.println(HORIZONTAL_LINE);
         System.out.println("[GigaBot] >> Got it. I've added this task:");
@@ -40,11 +99,6 @@ public class GigaBot {
         return currentCount;
     }
 
-    /**
-     * Initializes the application and enters the main listening loop.
-     *
-     * @param args Command line arguments.
-     */
     public static void main(String[] args) {
         System.out.println(HORIZONTAL_LINE);
         System.out.println(BANNER);
@@ -53,7 +107,9 @@ public class GigaBot {
         System.out.println(HORIZONTAL_LINE);
 
         Task[] tasks = new Task[100];
-        int tasksCounter = 0;
+        // Load data on startup
+        int tasksCounter = loadTasks(tasks);
+
         Scanner in = new Scanner(System.in);
 
         while (true) {
@@ -79,6 +135,7 @@ public class GigaBot {
                 } else if (command.startsWith("mark ")) {
                     int index = Integer.parseInt(command.substring(5)) - 1;
                     tasks[index].markAsDone();
+                    saveTasks(tasks, tasksCounter); // Save on update
                     System.out.println(HORIZONTAL_LINE);
                     System.out.println("[GigaBot] >> Nice! I've marked this task as done:");
                     System.out.println("[GigaBot] >>   " + tasks[index].toString());
@@ -87,6 +144,7 @@ public class GigaBot {
                 } else if (command.startsWith("unmark ")) {
                     int index = Integer.parseInt(command.substring(7)) - 1;
                     tasks[index].markAsUndone();
+                    saveTasks(tasks, tasksCounter); // Save on update
                     System.out.println(HORIZONTAL_LINE);
                     System.out.println("[GigaBot] >> OK, I've marked this task as not done yet:");
                     System.out.println("[GigaBot] >>   " + tasks[index].toString());
@@ -99,6 +157,7 @@ public class GigaBot {
                     String description = command.substring(5).trim();
                     tasks[tasksCounter] = new Todo(description);
                     tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
+                    saveTasks(tasks, tasksCounter); // Save on add
 
                 } else if (command.startsWith("deadline")) {
                     if (!command.contains(BY_MARKER)) {
@@ -110,6 +169,7 @@ public class GigaBot {
                     }
                     tasks[tasksCounter] = new Deadline(parts[0].trim(), parts[1].trim());
                     tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
+                    saveTasks(tasks, tasksCounter); // Save on add
 
                 } else if (command.startsWith("event")) {
                     if (!command.contains(FROM_MARKER) || !command.contains(TO_MARKER)) {
@@ -119,6 +179,7 @@ public class GigaBot {
                     String[] timeParts = parts[1].split(TO_MARKER);
                     tasks[tasksCounter] = new Event(parts[0].trim(), timeParts[0].trim(), timeParts[1].trim());
                     tasksCounter = printTaskAdded(tasks[tasksCounter], tasksCounter);
+                    saveTasks(tasks, tasksCounter); // Save on add
 
                 } else {
                     throw new GigaBotException("SYSTEM ERROR: Command not recognized. Please use todo, deadline, event, list, mark, unmark, or bye.");
