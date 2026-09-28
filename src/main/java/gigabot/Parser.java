@@ -1,10 +1,25 @@
 package gigabot;
 
+import java.util.ArrayList;
+
+/**
+ * Parses user string commands and executes the appropriate application logic.
+ */
 public class Parser {
     private static final String BY_MARKER = " /by ";
     private static final String FROM_MARKER = " /from ";
     private static final String TO_MARKER = " /to ";
 
+    /**
+     * Interprets a raw user command, executes the corresponding action, and returns whether the program should exit.
+     *
+     * @param command The raw string input from the user.
+     * @param tasks The current list of tasks.
+     * @param ui The user interface manager.
+     * @param storage The hard disk storage manager.
+     * @return true if the application should terminate, false otherwise.
+     * @throws GigaBotException If the command is invalid, unrecognized, or missing required arguments.
+     */
     public static boolean parseAndExecute(String command, TaskList tasks, Ui ui, Storage storage) throws GigaBotException {
         if (command.equals("bye")) {
             ui.showMessage("Shutting down. Hope to see you again soon!");
@@ -34,6 +49,16 @@ public class Parser {
             Task removedTask = tasks.deleteTask(index);
             storage.save(tasks);
             ui.showTaskDeleted(removedTask, tasks.getSize());
+        } else if (command.startsWith("find ")) {
+            String keyword = command.substring("find".length()).trim();
+            if (keyword.isEmpty()) throw new GigaBotException("Please provide a keyword to search for.");
+            ArrayList<Task> matchingTasks = new ArrayList<>();
+            for (Task task : tasks.getTasks()) {
+                if (task.getDescription().contains(keyword)) {
+                    matchingTasks.add(task);
+                }
+            }
+            ui.showMatchingTasks(matchingTasks);
         } else if (command.startsWith("todo")) {
             String desc = command.substring("todo".length()).trim();
             if (desc.isEmpty()) throw new GigaBotException("A todo task requires a description.");

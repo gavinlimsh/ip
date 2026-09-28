@@ -11,6 +11,11 @@ public class GigaBot {
     private TaskList tasks;
     private Ui ui;
 
+    /**
+     * Initializes the GigaBot application with the specified storage file.
+     *
+     * @param filePath The relative path to the hard disk storage file.
+     */
     public GigaBot(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
@@ -22,6 +27,9 @@ public class GigaBot {
         }
     }
 
+    /**
+     * Runs the main application loop, handling user input until the exit command is given.
+     */
     public void run() {
         ui.showWelcome();
         boolean isExit = false;
@@ -42,6 +50,11 @@ public class GigaBot {
         }
     }
 
+    /**
+     * The main entry point for the GigaBot application.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new GigaBot("data" + File.separator + "gigabot.txt").run();
     }
