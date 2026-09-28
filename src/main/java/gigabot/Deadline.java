@@ -4,26 +4,26 @@ package gigabot;
  * Represents a deadline task that needs to be completed before a specific date/time.
  */
 public class Deadline extends Task {
-    protected String by;
+    protected String dueDateTime;
 
     /**
      * Creates a new Deadline task.
      *
      * @param description The text description of the deadline.
-     * @param by The date or time the task must be completed by.
+     * @param dueDateTime The date or time the task must be completed by.
      */
-    public Deadline(String description, String by) {
+    public Deadline(String description, String dueDateTime) {
         super(description);
-        this.by = by;
+        this.dueDateTime = dueDateTime;
     }
 
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + by + ")";
+        return "[D]" + super.toString() + " (by: " + dueDateTime + ")";
     }
 
     @Override
     public String toSaveFormat() {
-        return "D | " + super.toSaveFormat() + " | " + by;
+        return "D | " + super.toSaveFormat() + " | " + dueDateTime;
     }
 }
