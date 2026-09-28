@@ -58,4 +58,13 @@ public class Task {
     public String toSaveFormat() {
         return (isDone ? "1" : "0") + " | " + description;
     }
+
+    /**
+     * Returns the description of the task.
+     *
+     * @return Task description text.
+     */
+    public String getDescription() {
+        return this.description;
+    }
 }

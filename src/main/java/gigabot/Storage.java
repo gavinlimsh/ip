@@ -7,13 +7,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Handles loading tasks from the hard disk and saving tasks to the hard disk.
+ */
 public class Storage {
     private String filePath;
 
+    /**
+     * Creates a new Storage instance.
+     *
+     * @param filePath The relative path to the storage file.
+     */
     public Storage(String filePath) {
         this.filePath = filePath;
     }
 
+    /**
+     * Loads the existing tasks from the storage file on disk.
+     *
+     * @return An ArrayList of the loaded Task objects.
+     * @throws GigaBotException If the file cannot be found or the data is corrupted.
+     */
     public ArrayList<Task> load() throws GigaBotException {
         ArrayList<Task> loadedTasks = new ArrayList<>();
         try {
@@ -51,6 +65,12 @@ public class Storage {
         return loadedTasks;
     }
 
+    /**
+     * Saves the current list of tasks to the storage file on disk.
+     *
+     * @param tasks The TaskList containing the tasks to be saved.
+     * @throws GigaBotException If the file cannot be written to.
+     */
     public void save(TaskList tasks) throws GigaBotException {
         try {
             File file = new File(filePath);
