@@ -3,7 +3,7 @@ package gigabot;
 import java.io.File;
 
 /**
- * GigaBot is an interactive conversational assistant that tracks and manages user tasks.
+ * GigaBot is an interactive conversational CLI assistant that tracks and manages user tasks.
  */
 public class GigaBot {
 
